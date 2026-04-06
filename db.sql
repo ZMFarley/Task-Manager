@@ -1,0 +1,5 @@
+CREATE TABLE Tasks(
+    id INTEGER NOT NULL PRIMARY KEY,
+    due_date DATE NOT NULL,
+    task TEXT
+);
