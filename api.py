@@ -1,8 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import ORJSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from requests.exceptions import ConnectionError 
-from urllib3.exceptions import MaxRetryError
 from pydantic import BaseModel, Field
 import sqlite3
 
@@ -29,7 +26,7 @@ class TaskGrabber(BaseModel):
     due_date: str
     task: str
 
-class TaskPatcher(BaseModel):
+class TaskPatch(BaseModel):
     due_date: str | None = None
     task: str | None = None 
 
@@ -37,7 +34,7 @@ class TaskPatcher(BaseModel):
 # CREATE TASK
 @app.post("/create-task", response_model=Task)
 def create_tasks(task: Task):
-    #Make Databse Connection 
+    #Make Database Connection 
     with sqlite3.connect("tasks.db") as conn:
         cursor = conn.cursor()
         #Insert Task 
@@ -60,26 +57,44 @@ def get_tasks(id: int):
             raise HTTPException(status_code=404, detail="Task Not Found")           
 
 # UPDATE TASK
-@app.patch("/patch-task/{id}", response_model=TaskPatcher)
-def patch_tasks():
-    pass
+@app.patch("/patch-task/{id}", response_model=TaskPatch)
+def patch_tasks(id: int, task: TaskPatch):
+    tasks = task.model_dump(exclude_unset=True)
+    query = []
+    values = []
+
+    #Create the payload, accounting for optional fields
+    for key, value in tasks.items():
+        query.append(f"{key} = ?")
+        values.append(value)
+
+    with sqlite3.connect("tasks.db") as conn:
+        cursor = conn.cursor()
+        #Put Task
+        cursor.execute(f"UPDATE Tasks SET {', '.join(query)} WHERE id = ?", 
+                        (*values, id))
+        if not cursor.rowcount:
+            raise HTTPException(status_code=404, detail="Task Not Found")
+        return task          
+
 
 @app.put("/put-task/{id}", response_model=Task)
 def put_tasks(id: int, task: Task):
      with sqlite3.connect("tasks.db") as conn:
         cursor = conn.cursor()
-        #Update Task
+        #Put Task
         cursor.execute("UPDATE Tasks SET due_date = ?, task = ? WHERE id = ?", 
                         (task.due_date, task.task, id))
         if not cursor.rowcount:
-            raise HTTPException(status_code=404, detail="Task Not Found")           
+            raise HTTPException(status_code=404, detail="Task Not Found")
+        return task            
 
 # DELETE TASK
 @app.delete("/delete-task/{id}", response_model=TaskGrabber)
-def delete_tasks():
+def delete_tasks(id: int):
      with sqlite3.connect("tasks.db") as conn:
         cursor = conn.cursor()
         #Update Task
-        cursor.execute("DELETE FROM Tasks where id = ?", (id))
+        cursor.execute("DELETE FROM Tasks where id = ?", (id,))
         if not cursor.rowcount:
             raise HTTPException(status_code=404, detail="Task Not Found")
