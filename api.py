@@ -3,9 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import sqlite3
 from datetime import date
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+#Lifespan to create database if it doesnt exist
+@asynccontextmanager
+async def lifespan (app: FastAPI):
+    #Load the Database
+    init_db()
+    yield
 
+app = FastAPI(lifespan=lifespan)
+    
 # ACCEPTABLE ORIGINS
 origins = ["http://localhost:5173", "http://127.0.0.1:5173"] 
 # CORS_MIDDLEWARE TO PREVENT CORS ISSUE
@@ -20,16 +28,16 @@ app.add_middleware(
 #Pydantic Models
 class Task(BaseModel):
     due_date: date
-    task: str = Field(min_length=1)
+    task: str = Field(min_length=1, max_length=255)
     
 class TaskGrabber(BaseModel):
     id: int
     due_date: date
-    task: str = Field(min_length=1)
+    task: str = Field(min_length=1, max_length=255)
 
 class TaskPatch(BaseModel):
     due_date: date | None = None
-    task: str | None = Field(default=None, min_length=1)  
+    task: str | None = Field(default=None, min_length=1, max_length=255)  
 
 
 # CREATE TASK
@@ -45,7 +53,7 @@ def create_tasks(task: Task):
         cursor.execute("SELECT * FROM Tasks WHERE id = ?", (cursor.lastrowid,))
         row = cursor.fetchone()
         return {"id": row[0], "due_date": row[1], "task": row[2]}
-    return task
+    
     
 # READ TASK
 @app.get("/read-task/{id}", response_model=TaskGrabber)
@@ -111,3 +119,13 @@ def delete_tasks(id: int):
         cursor.execute("DELETE FROM Tasks where id = ?", (id,))
         if not cursor.rowcount:
             raise HTTPException(status_code=404, detail="Task Not Found")
+        
+# Helper Function Section
+def init_db():
+    with sqlite3.connect("tasks.db") as conn:
+        cursor = conn.cursor()
+        #Read in the schema
+        with open("db.sql", "r") as file:
+            schema = file.read()
+        #Load table
+        cursor.execute(schema)

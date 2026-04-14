@@ -1,10 +1,16 @@
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
+colorama==0.4.6
 fastapi==0.135.3
 idna==3.11
+iniconfig==2.3.0
+packaging==26.0
+pluggy==1.6.0
 pydantic==2.13.0
 pydantic_core==2.46.0
+Pygments==2.20.0
+pytest==9.0.3
 starlette==1.0.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
