@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import sqlite3
+from datetime import date
 
 app = FastAPI()
 
@@ -18,21 +19,21 @@ app.add_middleware(
 
 #Pydantic Models
 class Task(BaseModel):
-    due_date: str
-    task: str
+    due_date: date
+    task: str = Field(min_length=1)
     
 class TaskGrabber(BaseModel):
     id: int
-    due_date: str
-    task: str
+    due_date: date
+    task: str = Field(min_length=1)
 
 class TaskPatch(BaseModel):
-    due_date: str | None = None
-    task: str | None = None 
+    due_date: date | None = None
+    task: str | None = Field(default=None, min_length=1)  
 
 
 # CREATE TASK
-@app.post("/create-task", response_model=Task)
+@app.post("/create-task", response_model=TaskGrabber, status_code=201)
 def create_tasks(task: Task):
     #Make Database Connection 
     with sqlite3.connect("tasks.db") as conn:
@@ -40,6 +41,10 @@ def create_tasks(task: Task):
         #Insert Task 
         cursor.execute("INSERT INTO Tasks(due_date, task) Values(?, ?)", 
                         (task.due_date, task.task))
+        #Return Entry
+        cursor.execute("SELECT * FROM Tasks WHERE id = ?", (cursor.lastrowid,))
+        row = cursor.fetchone()
+        return {"id": row[0], "due_date": row[1], "task": row[2]}
     return task
     
 # READ TASK
@@ -57,13 +62,16 @@ def get_tasks(id: int):
             raise HTTPException(status_code=404, detail="Task Not Found")           
 
 # UPDATE TASK
-@app.patch("/patch-task/{id}", response_model=TaskPatch)
+@app.patch("/patch-task/{id}", response_model=TaskGrabber)
 def patch_tasks(id: int, task: TaskPatch):
     tasks = task.model_dump(exclude_unset=True)
     query = []
     values = []
 
     #Create the payload, accounting for optional fields
+    if not tasks:
+        raise HTTPException(status_code=400, detail="No Data provided")
+
     for key, value in tasks.items():
         query.append(f"{key} = ?")
         values.append(value)
@@ -75,10 +83,12 @@ def patch_tasks(id: int, task: TaskPatch):
                         (*values, id))
         if not cursor.rowcount:
             raise HTTPException(status_code=404, detail="Task Not Found")
-        return task          
+        #Return Entry
+        cursor.execute("SELECT * FROM Tasks WHERE id = ?", (id,))
+        row = cursor.fetchone()
+        return {"id": row[0], "due_date": row[1], "task": row[2]}        
 
-
-@app.put("/put-task/{id}", response_model=Task)
+@app.put("/put-task/{id}", response_model=TaskGrabber)
 def put_tasks(id: int, task: Task):
      with sqlite3.connect("tasks.db") as conn:
         cursor = conn.cursor()
@@ -87,10 +97,13 @@ def put_tasks(id: int, task: Task):
                         (task.due_date, task.task, id))
         if not cursor.rowcount:
             raise HTTPException(status_code=404, detail="Task Not Found")
-        return task            
+        #Return Entry
+        cursor.execute("SELECT * FROM Tasks WHERE id = ?", (id,))
+        row = cursor.fetchone()
+        return {"id": row[0], "due_date": row[1], "task": row[2]}             
 
 # DELETE TASK
-@app.delete("/delete-task/{id}", response_model=TaskGrabber)
+@app.delete("/delete-task/{id}", status_code=204)
 def delete_tasks(id: int):
      with sqlite3.connect("tasks.db") as conn:
         cursor = conn.cursor()
