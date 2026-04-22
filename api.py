@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Path
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import sqlite3
@@ -40,6 +41,10 @@ class TaskPatch(BaseModel):
     due_date: date = None
     task: str = Field(default=None, min_length=1, max_length=255)  
 
+# REDIRECT TO SWAGGER UI FOR USER INTERACTION
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse(url="/docs")
 
 # CREATE TASK
 @app.post("/tasks", response_model=TaskGrabber, status_code=201)
@@ -54,7 +59,6 @@ def create_tasks(task: Task):
         cursor.execute("SELECT * FROM Tasks WHERE id = ?", (cursor.lastrowid,))
         row = cursor.fetchone()
         return {"id": row[0], "due_date": row[1], "task": row[2]}
-    
     
 # READ TASK
 @app.get("/tasks/{id}", response_model=TaskGrabber)
