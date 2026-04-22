@@ -572,7 +572,7 @@ def test_black_box_put():
         assert response.status_code == 422
         assert response.json()["detail"][0]['msg'] == 'Input should be a valid date or datetime, invalid date separator, expected `-`'
         
-        #ECP MISSING TASK
+        #ECP MISSING DUE DATE
         task = {"task": "high five"}
         response = client.put("/tasks/1",json=task)
         assert response.status_code == 422
