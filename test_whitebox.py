@@ -17,30 +17,48 @@ def test_white_box_post():
     
 def test_white_box_get():
     check_existing_table(True)
-    #ROW EXISTS TRUE BRANCH
-    #ROW DOES NOT EXIST BRANCH 
-    #ENDPOINT EXECUTION SUCCESS
+    #ENDPOINT EXECUTION SUCCESS/#ROW EXISTS TRUE BRANCH
     task = {"due_date": "2020-02-02", "task": "A"}
     response = client.post("/tasks",json=task)
     response = client.get("/tasks/1")
     assert response.status_code == 200
     assert response.json() == {"id": 1, "due_date": "2020-02-02", "task": "A"}
     
+    #ROW DOES NOT EXIST BRANCH 
+    response = client.get("/tasks/2")
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Task Not Found'}
+
 def test_white_box_patch():
     check_existing_table(True)
-    #DYNAMIC QUERY CREATION FOR TASK ONLY
-    #DYANMIC QUERY CREATION FOR DUE DATE ONLY
-    #DYANMIC QUERY CREATION FOR BOTH 
-    #ROW EXISTS TRUE BRANCH
-    #ROW DOES NOT EXIST BRANCH 
-
-    #ENDPOINT EXECUTION SUCCESS
+    #TEST SETUP
     task = {"due_date": "2020-02-02", "task": "A"}
     response = client.post("/tasks",json=task)
+
+    #DYNAMIC QUERY CREATION FOR TASK ONLY/ENDPOINT SUCCESS/ROW EXISTS TRUE BRANCH
     task = {"task": "Abe"}
     response = client.patch("/tasks/1",json=task)
     assert response.status_code == 200
     assert response.json() == {"id": 1, "due_date": "2020-02-02", "task": "Abe"}
+
+    #DYANMIC QUERY CREATION FOR DUE DATE ONLY/ENDPOINT SUCCESS/ROW EXISTS TRUE BRANCH
+    task = {"due_date": "1820-12-31"}
+    response = client.patch("/tasks/1",json=task)
+    assert response.status_code == 200
+    assert response.json() == {"id": 1, "due_date": "1820-12-31", "task": "Abe"}
+
+    #DYANMIC QUERY CREATION FOR BOTH/ENDPOINT SUCCESS/ROW EXISTS TRUE BRANCH
+    task = {"due_date": "1911-03-23","task": "Abel"}
+    response = client.patch("/tasks/1",json=task)
+    assert response.status_code == 200
+    assert response.json() == {"id": 1, "due_date": "1911-03-23","task": "Abel"}
+   
+    #ROW DOES NOT EXIST BRANCH 
+    task = {"due_date": "1911-03-21","task": "Abela"}
+    response = client.patch("/tasks/2",json=task)
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Task Not Found'}
+
     
 def test_white_box_put():
     check_existing_table(True)
