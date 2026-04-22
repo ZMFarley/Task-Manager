@@ -37,8 +37,8 @@ class TaskGrabber(BaseModel):
     task: str = Field(min_length=1, max_length=255)
 
 class TaskPatch(BaseModel):
-    due_date: date | None = None
-    task: str | None = Field(default=None, min_length=1, max_length=255)  
+    due_date: date = None
+    task: str = Field(default=None, min_length=1, max_length=255)  
 
 
 # CREATE TASK
