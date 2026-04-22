@@ -73,7 +73,7 @@ def get_tasks(id: Annotated[int, Path(title="Bounds of ID",gt=0,le=9223372036854
 
 # UPDATE TASK
 @app.patch("/tasks/{id}", response_model=TaskGrabber)
-def patch_tasks(id: int, task: TaskPatch):
+def patch_tasks(id: Annotated[int, Path(title="Bounds of ID",gt=0,le=9223372036854775807)], task: TaskPatch):
     tasks = task.model_dump(exclude_unset=True)
     query = []
     values = []
@@ -99,7 +99,7 @@ def patch_tasks(id: int, task: TaskPatch):
         return {"id": row[0], "due_date": row[1], "task": row[2]}        
 
 @app.put("/tasks/{id}", response_model=TaskGrabber)
-def put_tasks(id: int, task: Task):
+def put_tasks(id: Annotated[int, Path(title="Bounds of ID",gt=0,le=9223372036854775807)], task: Task):
      with sqlite3.connect("tasks.db") as conn:
         cursor = conn.cursor()
         #Put Task
@@ -114,7 +114,7 @@ def put_tasks(id: int, task: Task):
 
 # DELETE TASK
 @app.delete("/tasks/{id}", status_code=204)
-def delete_tasks(id: int):
+def delete_tasks(id: Annotated[int, Path(title="Bounds of ID",gt=0,le=9223372036854775807)]):
      with sqlite3.connect("tasks.db") as conn:
         cursor = conn.cursor()
         #Update Task
