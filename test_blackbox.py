@@ -517,7 +517,7 @@ def test_black_box_put():
 
         #ECP MISSING task
         task = {"due_date": "1220-12-31"}
-        response = client.post("/tasks",json=task)
+        response = client.put("/tasks/1",json=task)
         assert response.status_code == 422
         assert response.json()["detail"][0]['msg'] == 'Field required'
         
@@ -574,7 +574,7 @@ def test_black_box_put():
         
         #ECP MISSING TASK
         task = {"task": "high five"}
-        response = client.post("/tasks",json=task)
+        response = client.put("/tasks/1",json=task)
         assert response.status_code == 422
         assert response.json()["detail"][0]['msg'] == 'Field required'
 
