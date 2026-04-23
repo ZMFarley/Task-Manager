@@ -26,6 +26,12 @@ Open the interactive API documentation at:
 http://localhost:8000/docs
 ```
 
+If you want to use the deployed version instead of running it locally, open:
+
+```text
+https://task-manager-a749.onrender.com/
+```
+
 ## CI Workflow
 
 The repository includes a GitHub Actions workflow at `.github/workflows/cicd.yml` that provides continuous integration for the project.
