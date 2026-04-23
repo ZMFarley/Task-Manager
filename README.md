@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is my CIS-470: Software Testing & Automation final project. It a FastAPI-based task manager backed by a SQLite database. The application exposes REST endpoints for creating, retrieving, updating, and deleting task records. When the application starts, it initializes the database from `db.sql` if the table does not already exist. The purpose of this project is to provide a full stack application that can be used and deployed via a CI/CD Workflow to github, running the included test suite on push or pull requests. From there, the application is hosted as a web service on Render, which continously checks for updates, satisfying the requirements of CI/CD.
+This is my CIS-470: Software Testing & Automation final project at UMass Dartmouth. It a FastAPI-based task manager backed by a SQLite database. The application exposes REST endpoints for creating, retrieving, updating, and deleting task records. When the application starts, it initializes the database from `db.sql` if the table does not already exist. The purpose of this project is to provide a full stack application that can be used and deployed via a CI/CD Workflow to github, running the included test suite on push or pull requests. From there, the application is hosted as a web service on Render, which continously checks for updates, satisfying the requirements of CI/CD.
 
 The API also redirects the root route (`/`) to the Swagger UI at `/docs`, which provides an interactive interface for testing the endpoints.
 
