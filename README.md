@@ -40,11 +40,12 @@ The repository includes a GitHub Actions workflow at `.github/workflows/cicd.yml
 
 This workflow helps ensure that changes committed to GitHub do not break the API or introduce obvious Python errors. It supports the project by:
 
-- automatically validating the code after pushes and pull requests
-- checking both code quality and functional behavior
-- providing fast feedback before deployment updates are picked up by Render
+- Automatically validating the code after pushes and pull requests
+- Checking both code quality and functional behavior
+- Providing fast feedback before deployment updates are picked up by Render
+- Triggering deployment on succesful testing to Render
 
-Because the project is deployed through GitHub and hosted on Render, this workflow serves as the continuous integration portion of the overall CI/CD pipeline.
+Because the project is deployed through GitHub and hosted on Render, this workflow serves both ends of the pipeline, as it automatically tests recent code changes, and deploys successful builds to Render thereafter.
 
 ## Data Model and Schema
 
